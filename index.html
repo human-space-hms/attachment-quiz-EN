@@ -655,7 +655,7 @@ function getResultPresentation(){
     return {
       mode:'primary-secondary',
       figureStageHeight:'190px',
-      nameHTML: `<div>${p.title} × ${s.title}</div>`,
+      nameHTML: `<div>${p.title}</div><div class="result-x">x</div><div>${s.title}</div>`,
       leadHTML: `Your pattern leans closer to <strong>${p.title}</strong><br>while you also carry some tendencies of <strong>${s.title}</strong>`,
       figureHTML: `
         <img src="${p.img}" style="width:180px; left:50%; top:0; transform:translateX(-50%) rotate(-3deg); z-index:2;" onerror="this.style.display='none'">
@@ -723,7 +723,7 @@ function getShareData(){
     return { mode:'dual', titleLines:[p.title, s.title], images:[p.img, s.img],
       explanationLines: dc ? dc.leadLines : [], analysisLines: p.strengthLines, norm };
   } else if(gap <= 25){
-    return { mode:'primary-secondary', titleLines:[p.title], subtitleLines:[`× ${s.title}`], images:[p.img],
+    return { mode:'primary-secondary', titleLines:[p.title, s.title], images:[p.img, s.img],
       explanationLines: p.approachLines, analysisLines: p.strengthLines, norm };
   } else {
     return { mode:'primary', titleLines:[p.title], images:[p.img],
@@ -818,7 +818,7 @@ async function generateShareCanvas(){
 
   // character image(s)
   const imgAreaTop = y;
-  if(data.mode === 'dual'){
+  if(data.images.length === 2){
     try{
       const [img1, img2] = await Promise.all([loadImg(data.images[0]), loadImg(data.images[1])]);
       const w1 = 330, h1 = w1 * (img1.height/img1.width);
@@ -842,17 +842,12 @@ async function generateShareCanvas(){
 
   // title
   const titleFont = "600 46px 'Fraunces', serif";
-  if(data.mode === 'dual'){
+  if(data.titleLines.length === 2){
     const t1 = wrapLines(data.titleLines[0], titleFont, 880);
     y = drawCenteredLines(t1, titleFont, '#3A342A', 58, y);
     y = drawCenteredLines(['x'], "italic 400 34px 'Lora', serif", 'rgba(58,52,42,0.4)', 50, y+8);
     const t2 = wrapLines(data.titleLines[1], titleFont, 880);
     y = drawCenteredLines(t2, titleFont, '#3A342A', 58, y);
-  } else if(data.mode === 'primary-secondary'){
-    const t1 = wrapLines(data.titleLines[0], titleFont, 880);
-    y = drawCenteredLines(t1, titleFont, '#3A342A', 58, y);
-    const t2 = wrapLines(data.subtitleLines[0], "500 32px 'Inter', sans-serif", 880);
-    y = drawCenteredLines(t2, "500 32px 'Inter', sans-serif", 'rgba(58,52,42,0.55)', 46, y+8);
   } else {
     const t1 = wrapLines(data.titleLines[0], titleFont, 880);
     y = drawCenteredLines(t1, titleFont, '#3A342A', 58, y);
