@@ -142,14 +142,16 @@
   }
   .bubble-btn.selected{ background:var(--slate-deep); border-color:var(--slate-deep); color:#fff; }
   .scale-caption{ display:flex; justify-content:space-between; font-size:9px; color:var(--ink-faint); margin-top:8px; }
-  .qwrap{ display:flex; flex-direction:column; justify-content:center; gap:2px; flex:1; }
+  .qwrap{ display:flex; flex-direction:column; justify-content:flex-start; gap:2px; flex:1; padding-top:6px; }
 
   /* ---------- result ---------- */
   .result-wrap{ align-items:center; text-align:center; justify-content:center; }
   .result-lead{ font-size:12px; color:var(--ink-soft); margin-bottom:6px; }
   .result-figure-stage{ position:relative; width:100%; height:190px; margin-bottom:4px; flex-shrink:0; }
-  .result-figure-stage img{ position:absolute; filter: drop-shadow(0 10px 16px rgba(58,52,42,0.18)); }
+  .result-figure-stage img{ filter: drop-shadow(0 10px 16px rgba(58,52,42,0.18)); }
   .result-name{ font-family:'Fraunces',serif; font-weight:600; font-size:16.5px; line-height:1.45; margin-bottom:8px; }
+  .result-name-main{ font-family:'Fraunces',serif; font-weight:600; font-size:19px; line-height:1.35; }
+  .result-name-sub{ font-family:'Inter',sans-serif; font-weight:500; font-size:12.5px; color:var(--ink-soft); line-height:1.4; margin-bottom:6px; }
   .result-x{ font-family:'Lora',serif; font-style:italic; font-size:13px; color:var(--ink-faint); margin:2px 0; }
   .result-story{ font-size:12px; color:var(--ink-soft); line-height:1.8; margin-bottom:8px; }
   .result-combo{ font-size:12px; color:var(--ink); line-height:1.8; }
@@ -240,13 +242,15 @@
       <div class="corner-figure" style="width:180px; left:-40px; bottom:36px; opacity:0.8; transform:rotate(-8deg);"><img src="avoidant.png" alt="" onerror="this.parentElement.style.display='none'"></div>
       <div class="page-content" style="align-items:center; text-align:center; justify-content:center; padding-bottom:12px;">
         <div class="p-title" style="font-size:16px; text-align:center;">16 short statements<br>Answer based on how things feel right now</div>
-        <div class="scale-preview" style="margin-top:20px;">
-          <span style="font-size:10.5px; color:var(--ink-soft); margin-right:5px;">Not like me</span>
-          <div class="sp-circle" style="background:#D9CDBA;">1</div>
-          <div class="sp-circle" style="background:#B79F7C;">2</div>
-          <div class="sp-circle" style="background:#8A7A5C;">3</div>
-          <div class="sp-circle" style="background:var(--slate-deep);">4</div>
-          <span style="font-size:10.5px; color:var(--ink-soft); margin-left:5px;">Very much me</span>
+        <div class="scale-preview" style="margin-top:20px; width:100%;">
+          <span style="flex:1; text-align:right; padding-right:8px; font-size:10.5px; color:var(--ink-soft); white-space:nowrap;">Not like me</span>
+          <div style="display:flex; gap:8px; flex-shrink:0;">
+            <div class="sp-circle" style="background:#D9CDBA;">1</div>
+            <div class="sp-circle" style="background:#B79F7C;">2</div>
+            <div class="sp-circle" style="background:#8A7A5C;">3</div>
+            <div class="sp-circle" style="background:var(--slate-deep);">4</div>
+          </div>
+          <span style="flex:1; text-align:left; padding-left:8px; font-size:10.5px; color:var(--ink-soft); white-space:nowrap;">Very much me</span>
         </div>
         <div class="p-body" style="color:var(--ink-soft); font-size:12px; text-align:center; margin-top:16px;">16 questions total, about 3–5 minutes</div>
       </div>
@@ -585,7 +589,7 @@ function renderQuestionPage(pageIndex){
         `).join('')}
       </div>
     </div>
-  `).join('') + `<div class="scale-caption"><span>Not like me</span><span>Very much me</span></div>`;
+  `).join('');
 }
 function setAnswer(qid, val){
   answers[qid] = val;
@@ -629,6 +633,17 @@ function computeResult(){
 
 function pairKey(k1,k2){ return [k1,k2].sort().join('+'); }
 
+function splitTitle(t){
+  const idx = t.indexOf('｜');
+  if(idx === -1) return [t];
+  return [t.slice(0, idx), t.slice(idx+1)];
+}
+function titleBlockHTML(title){
+  const parts = splitTitle(title);
+  if(parts.length === 1) return `<div class="result-name-main">${parts[0]}</div>`;
+  return `<div class="result-name-main">${parts[0]}</div><div class="result-name-sub">${parts[1]}</div>`;
+}
+
 function getResultPresentation(){
   const { primary, secondary, gap } = currentResult;
   const p = primary.arche, s = secondary.arche;
@@ -640,11 +655,11 @@ function getResultPresentation(){
     return {
       mode:'dual',
       figureStageHeight:'190px',
-      nameHTML: `<div>${p.title}</div><div class="result-x">x</div><div>${s.title}</div>`,
+      nameHTML: `${titleBlockHTML(p.title)}<div class="result-x">x</div>${titleBlockHTML(s.title)}`,
       leadHTML: `<p style="margin-bottom:6px;">Your relational pattern<br>may lean in two directions at once</p><p>${linesToHTML(leadLines)}</p>`,
-      figureHTML: `
-        <img src="${p.img}" style="width:150px; left:8%; top:8px; transform:rotate(-6deg); z-index:2;" onerror="this.style.display='none'">
-        <img src="${s.img}" style="width:132px; right:4%; top:34px; transform:rotate(7deg); z-index:1;" onerror="this.style.display='none'">`,
+      figureHTML: `<div style="display:flex; align-items:center; justify-content:center; gap:14px; height:100%;">
+        <img src="${p.img}" style="width:140px; height:auto;" onerror="this.style.display='none'">
+        <img src="${s.img}" style="width:140px; height:auto;" onerror="this.style.display='none'"></div>`,
       storyHTML: '',
       qualitiesHTML: `
         <div class="gc-block"><div class="gc-label">Your strength · ${p.title}</div><p class="p-body" style="text-align:center;">${linesToHTML(p.strengthLines)}</p></div>
@@ -655,26 +670,27 @@ function getResultPresentation(){
     return {
       mode:'primary-secondary',
       figureStageHeight:'190px',
-      nameHTML: `<div>${p.title}</div><div class="result-x">x</div><div>${s.title}</div>`,
+      nameHTML: `${titleBlockHTML(p.title)}<div class="result-x">x</div>${titleBlockHTML(s.title)}`,
       leadHTML: `Your pattern leans closer to <strong>${p.title}</strong><br>while you also carry some tendencies of <strong>${s.title}</strong>`,
-      figureHTML: `
-        <img src="${p.img}" style="width:180px; left:50%; top:0; transform:translateX(-50%) rotate(-3deg); z-index:2;" onerror="this.style.display='none'">
-        <img src="${s.img}" style="width:112px; right:0%; bottom:0; transform:rotate(8deg); z-index:1; opacity:0.9;" onerror="this.style.display='none'">`,
-      storyHTML: linesToHTML(p.approachLines),
+      figureHTML: `<div style="display:flex; align-items:center; justify-content:center; gap:14px; height:100%;">
+        <img src="${p.img}" style="width:140px; height:auto;" onerror="this.style.display='none'">
+        <img src="${s.img}" style="width:140px; height:auto;" onerror="this.style.display='none'"></div>`,
+      storyHTML: '',
       qualitiesHTML: `
         <div class="gc-block"><div class="gc-label">Your relationship strength</div><p class="p-body" style="text-align:center;">${linesToHTML(p.strengthLines)}</p></div>
         <div class="gc-block"><div class="gc-label">Where you may get stuck</div><p class="p-body" style="text-align:center;">${linesToHTML(p.difficultyLines)}</p></div>
         <div class="gc-block"><div class="gc-label">Something to try</div><p class="p-body" style="text-align:center;">${linesToHTML(p.tryLines)}</p></div>`
     };
   } else {
-    // ONE ANSWER — centered, figure enlarged 50%
+    // ONE ANSWER — centered, figure enlarged
     return {
       mode:'primary',
-      figureStageHeight:'280px',
-      nameHTML: `<div>${p.title}</div>`,
+      figureStageHeight:'210px',
+      nameHTML: titleBlockHTML(p.title),
       leadHTML: '',
-      figureHTML: `<img src="${p.img}" style="width:300px; left:50%; top:0; transform:translateX(-50%);" onerror="this.style.display='none'">`,
-      storyHTML: linesToHTML(p.approachLines),
+      figureHTML: `<div style="display:flex; align-items:center; justify-content:center; height:100%;">
+        <img src="${p.img}" style="width:240px; height:auto;" onerror="this.style.display='none'"></div>`,
+      storyHTML: '',
       qualitiesHTML: `
         <div class="gc-block"><div class="gc-label">Your relationship strength</div><p class="p-body" style="text-align:center;">${linesToHTML(p.strengthLines)}</p></div>
         <div class="gc-block"><div class="gc-label">Where you may get stuck</div><p class="p-body" style="text-align:center;">${linesToHTML(p.difficultyLines)}</p></div>
