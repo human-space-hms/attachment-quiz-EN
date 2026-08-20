@@ -856,17 +856,29 @@ async function generateShareCanvas(){
     }catch(e){ y = imgAreaTop + 500; }
   }
 
-  // title
-  const titleFont = "600 46px 'Fraunces', serif";
+  // title — split on ｜ first so word-wrap never sees the CJK divider
+  // character (which would otherwise force character-by-character
+  // wrapping on English words, breaking them mid-word)
+  const titleMainFont = "600 46px 'Fraunces', serif";
+  const titleSubFont = "500 30px 'Inter', sans-serif";
+  function splitTitleCanvas(t){
+    const i = t.indexOf('｜');
+    return i === -1 ? [t, null] : [t.slice(0,i), t.slice(i+1)];
+  }
+  function drawTitleBlock(title, yStart){
+    const [main, sub] = splitTitleCanvas(title);
+    let yy = drawCenteredLines(wrapLines(main, titleMainFont, 880), titleMainFont, '#3A342A', 58, yStart);
+    if(sub){
+      yy = drawCenteredLines(wrapLines(sub, titleSubFont, 780), titleSubFont, 'rgba(58,52,42,0.6)', 42, yy+6);
+    }
+    return yy;
+  }
   if(data.titleLines.length === 2){
-    const t1 = wrapLines(data.titleLines[0], titleFont, 880);
-    y = drawCenteredLines(t1, titleFont, '#3A342A', 58, y);
-    y = drawCenteredLines(['x'], "italic 400 34px 'Lora', serif", 'rgba(58,52,42,0.4)', 50, y+8);
-    const t2 = wrapLines(data.titleLines[1], titleFont, 880);
-    y = drawCenteredLines(t2, titleFont, '#3A342A', 58, y);
+    y = drawTitleBlock(data.titleLines[0], y);
+    y = drawCenteredLines(['x'], "italic 400 34px 'Lora', serif", 'rgba(58,52,42,0.4)', 50, y+10);
+    y = drawTitleBlock(data.titleLines[1], y);
   } else {
-    const t1 = wrapLines(data.titleLines[0], titleFont, 880);
-    y = drawCenteredLines(t1, titleFont, '#3A342A', 58, y);
+    y = drawTitleBlock(data.titleLines[0], y);
   }
   y += 50;
 
